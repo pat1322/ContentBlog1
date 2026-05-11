@@ -222,27 +222,27 @@
     .hero-eyebrow {
       font-family:'Jost',sans-serif; font-size:.68rem; font-weight:500;
       letter-spacing:.3em; text-transform:uppercase; color:var(--terra); margin-bottom:1.25rem;
-      opacity:0; transform:translateY(14px); transition: opacity .7s, transform .7s;
+      text-align:center; opacity:0; transform:translateY(14px); transition: opacity .7s, transform .7s;
     }
     .hero-title {
       font-family:'Cormorant Garamond',serif;
       font-size:clamp(2.3rem,5.5vw,4.8rem); font-weight:300; line-height:1.08;
-      letter-spacing:-0.01em; color:var(--brown); margin-bottom:1.35rem;
+      letter-spacing:-0.01em; color:var(--brown); margin-bottom:1.35rem; text-align:center;
       opacity:0; transform:translateY(22px); transition: opacity .8s .1s, transform .8s .1s;
     }
     .hero-subtitle {
-      font-family:'Lora',serif; font-size:1rem; font-style:italic;
-      color:var(--brown-soft); max-width:540px; line-height:1.75; margin-bottom:1.75rem;
+      font-family:'Lora',serif; font-size:1.2rem; font-style:italic;
+      color:var(--brown); max-width:540px; line-height:1.75; margin-bottom:1.75rem; text-align:center;
       opacity:0; transform:translateY(14px); transition: opacity .7s .22s, transform .7s .22s;
     }
-    .hero-rule { width:36px; height:1.5px; background:var(--terra); margin-bottom:1.1rem; opacity:0; transition: opacity .6s .34s; }
+    .hero-rule { width:36px; height:1.5px; background:var(--terra); margin:0 auto 1.1rem; opacity:0; transition: opacity .6s .34s; }
     .hero-meta {
       font-family:'Jost',sans-serif; font-size:.7rem; font-weight:300;
       color:var(--brown-soft); letter-spacing:.1em;
-      display:flex; align-items:center; gap:.85rem;
+      display:flex; align-items:center; justify-content:center; gap:.85rem; flex-wrap:wrap;
       opacity:0; transition: opacity .6s .44s;
     }
-    .meta-dot { width:3px; height:3px; border-radius:50%; background:var(--peach); flex-shrink:0; }
+    .meta-sep { color:var(--terra); opacity:.7; }
     .hero-animated.in { opacity:1 !important; transform:translateY(0) !important; }
 
     /* ─── POST IMAGE ─────────────────────────────── */
@@ -251,16 +251,17 @@
 
     /* ─── ARTICLE ────────────────────────────────── */
     .article { max-width:640px; margin:0 auto; padding:0 2rem 4rem; }
-    .article p { font-size:1.04rem; line-height:1.92; color:var(--brown); margin-bottom:1.75rem; }
+    .article p { font-size:1.04rem; line-height:1.92; color:var(--brown); margin-bottom:1.75rem; text-align:justify; }
     .article p:first-of-type::first-letter {
-      font-family:'Cormorant Garamond',serif; font-size:4.6rem; font-weight:600;
-      float:left; line-height:.77; margin:.1em .08em 0 0; color:var(--terra);
+      font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:600;
+      color:var(--terra); margin-right:.06em;
     }
     .pullquote {
       border-left:2px solid var(--blush); padding:.2rem 0 .2rem 1.75rem;
       margin:2.5rem 0 !important;
       font-family:'Cormorant Garamond',serif !important; font-size:1.5rem !important;
       font-style:italic !important; color:var(--brown-mid) !important; line-height:1.5 !important;
+      text-align:justify !important;
     }
     .pullquote::first-letter { all:unset; }
     .art-divider {
@@ -526,10 +527,6 @@
 
   <article class="article" id="post-content"></article>
 
-  <div class="article" style="padding-top:0;padding-bottom:0;">
-    <div class="tags-wrap" id="post-tags"></div>
-  </div>
-
   <!-- QUOTE SECTION -->
   <section id="quote-section" class="reveal">
     <div class="quote-inner">
@@ -688,13 +685,8 @@ function renderPost(post) {
   document.getElementById('post-subtitle').textContent = post.subtitle || '';
   document.getElementById('post-eyebrow').textContent  =
     (post.tags||[]).map(t => t.charAt(0).toUpperCase()+t.slice(1)).join(' · ') || 'Essay';
-  document.getElementById('post-meta').innerHTML = `
-    <span>${BLOG.site.author}</span>
-    <span class="meta-dot"></span>
-    <span>${fmtDate(post.date)}</span>
-    <span class="meta-dot"></span>
-    <span>${readTime(post.content)} min read</span>
-  `;
+  const metaParts = [fmtDayName(post.date), fmtDate(post.date), post.location, `${readTime(post.content)} min read`].filter(Boolean);
+  document.getElementById('post-meta').innerHTML = metaParts.map(s => `<span>${esc(s)}</span>`).join('<span class="meta-sep"> — </span>');
 
   const imgWrap = document.getElementById('post-img-wrap');
   if (post.image) {
@@ -730,10 +722,6 @@ function renderPost(post) {
     p.textContent = para;
     content.appendChild(p);
   });
-
-  // Tags
-  document.getElementById('post-tags').innerHTML =
-    (post.tags||[]).map(t => `<span class="tag">${esc(t)}</span>`).join('');
 
   // Quote
   const q = BLOG.site.quote || {};
@@ -823,6 +811,11 @@ function fmtDate(s) {
   if (!s) return '';
   try { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); }
   catch { return s; }
+}
+function fmtDayName(s) {
+  if (!s) return '';
+  try { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{weekday:'long'}); }
+  catch { return ''; }
 }
 function readTime(t) { return Math.max(1,Math.round((t||'').split(/\s+/).length/200)); }
 function esc(s) {
