@@ -6,24 +6,27 @@ const path    = require('path');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── Persistent paths (set via Railway env vars pointing at mounted volume) ──
 const DATA_DIR    = process.env.DATA_DIR    || path.join(__dirname, 'data');
 const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
 const BLOG_FILE   = path.join(DATA_DIR, 'blog.json');
 
-// Ensure directories exist on every start
 [DATA_DIR, UPLOADS_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// ── Default blog content ──────────────────────────────────────────────────
 const DEFAULT_BLOG = {
   site: {
-    title:    "Pause & Exist",
-    tagline:  "A space for thoughts that don't need to go anywhere",
-    author:   "Anonymous",
-    bio:      "Writing about life, hobbies, and the art of simply being.",
-    adminPassword: "admin123"
+    title:         "Daily Dose",
+    tagline:       "A daily dose of thoughts that matter",
+    author:        "The Editor",
+    bio:           "Writing about life, hobbies, and the art of simply being.",
+    adminPassword: "admin123",
+    quote: {
+      text:        "Not everything needs to be optimized. Not every moment has to lead somewhere. Sometimes the most radical act is to simply pause.",
+      attribution: "— Daily Dose",
+      image:       null
+    },
+    contributors:  []
   },
   posts: [
     {
@@ -40,7 +43,6 @@ const DEFAULT_BLOG = {
   ]
 };
 
-// Init blog.json if missing
 if (!fs.existsSync(BLOG_FILE)) {
   fs.writeFileSync(BLOG_FILE, JSON.stringify(DEFAULT_BLOG, null, 2));
 }
@@ -49,84 +51,56 @@ function readBlog() {
   try { return JSON.parse(fs.readFileSync(BLOG_FILE, 'utf8')); }
   catch { return DEFAULT_BLOG; }
 }
-
 function writeBlog(data) {
   fs.writeFileSync(BLOG_FILE, JSON.stringify(data, null, 2));
 }
 
-// ── Multer (image uploads → volume) ──────────────────────────────────────
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-  filename:    (_req,  file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${Date.now()}${ext}`);
-  }
+  filename:    (_req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname).toLowerCase()}`)
 });
 const upload = multer({
   storage,
   limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (/image\/(jpeg|png|gif|webp)/.test(file.mimetype)) cb(null, true);
-    else cb(new Error('Only image files allowed'));
+    /image\/(jpeg|png|gif|webp)/.test(file.mimetype) ? cb(null, true) : cb(new Error('Images only'));
   }
 });
 
-// ── Middleware ────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-// ── Auth middleware (simple password) ────────────────────────────────────
 function requireAuth(req, res, next) {
-  const token = req.headers['x-admin-token'];
-  const blog  = readBlog();
-  if (token === blog.site.adminPassword) return next();
+  if (req.headers['x-admin-token'] === readBlog().site.adminPassword) return next();
   res.status(401).json({ error: 'Unauthorized' });
 }
 
-// ── Public API ────────────────────────────────────────────────────────────
 app.get('/api/blog', (_req, res) => {
   const blog = readBlog();
-  // Don't expose admin password publicly
-  const safe = { ...blog, site: { ...blog.site, adminPassword: undefined } };
-  res.json(safe);
+  const { adminPassword, ...site } = blog.site;
+  res.json({ site, posts: blog.posts });
 });
+app.get('/api/posts', (_req, res) => res.json(readBlog().posts.filter(p => p.published)));
 
-app.get('/api/posts', (_req, res) => {
-  res.json(readBlog().posts.filter(p => p.published));
-});
-
-// ── Admin API (protected) ─────────────────────────────────────────────────
 app.post('/api/auth', (req, res) => {
-  const blog = readBlog();
-  if (req.body.password === blog.site.adminPassword) res.json({ ok: true });
-  else res.status(401).json({ error: 'Wrong password' });
+  req.body.password === readBlog().site.adminPassword
+    ? res.json({ ok: true })
+    : res.status(401).json({ error: 'Wrong password' });
 });
 
 app.put('/api/admin/site', requireAuth, (req, res) => {
-  const blog  = readBlog();
-  blog.site   = { ...blog.site, ...req.body };
+  const blog = readBlog();
+  blog.site  = { ...blog.site, ...req.body };
   writeBlog(blog);
   res.json({ ok: true });
 });
 
-app.get('/api/admin/posts', requireAuth, (_req, res) => {
-  res.json(readBlog().posts);
-});
+app.get('/api/admin/posts', requireAuth, (_req, res) => res.json(readBlog().posts));
 
 app.post('/api/admin/posts', requireAuth, (req, res) => {
   const blog = readBlog();
-  const post = {
-    id:        Date.now().toString(),
-    title:     req.body.title     || 'Untitled',
-    subtitle:  req.body.subtitle  || '',
-    content:   req.body.content   || '',
-    image:     req.body.image     || null,
-    date:      req.body.date      || new Date().toISOString().split('T')[0],
-    tags:      req.body.tags      || [],
-    published: req.body.published !== undefined ? req.body.published : false,
-    featured:  req.body.featured  || false
-  };
+  const post = { id: Date.now().toString(), published: false, featured: false, date: new Date().toISOString().split('T')[0], ...req.body };
   blog.posts.unshift(post);
   writeBlog(blog);
   res.json(post);
@@ -142,18 +116,15 @@ app.put('/api/admin/posts/:id', requireAuth, (req, res) => {
 });
 
 app.delete('/api/admin/posts/:id', requireAuth, (req, res) => {
-  const blog  = readBlog();
-  blog.posts  = blog.posts.filter(p => p.id !== req.params.id);
+  const blog = readBlog();
+  blog.posts = blog.posts.filter(p => p.id !== req.params.id);
   writeBlog(blog);
   res.json({ ok: true });
 });
 
 app.post('/api/admin/upload', requireAuth, upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file received' });
+  if (!req.file) return res.status(400).json({ error: 'No file' });
   res.json({ url: `/uploads/${req.file.filename}` });
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────
-app.listen(PORT, () =>
-  console.log(`✦ Blog running → http://localhost:${PORT}`)
-);
+app.listen(PORT, () => console.log(`✦ Daily Dose → http://localhost:${PORT}`));
