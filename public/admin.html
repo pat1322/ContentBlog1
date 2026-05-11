@@ -461,7 +461,7 @@
         <img id="post-img-preview" class="img-preview-box" src="" alt="">
       </div>
       <input type="file" id="post-img-file" accept="image/*" style="display:none" onchange="handleFileInput(event,'post-img')">
-      <input type="hidden" id="edit-image">
+      <input type="hidden" id="post-img">
     </div>
     <div style="border-top:1px solid var(--border);margin:1rem 0;"></div>
     <div class="toggle-row">
@@ -709,7 +709,7 @@ function openNew() {
   document.getElementById('edit-date').value          = new Date().toISOString().split('T')[0];
   document.getElementById('edit-tags').value          = '';
   document.getElementById('edit-location').value      = '';
-  document.getElementById('edit-image').value         = '';
+  document.getElementById('post-img').value            = '';
   document.getElementById('edit-published').checked   = false;
   document.getElementById('edit-featured').checked    = false;
   resetImgPreview('post-img');
@@ -726,7 +726,7 @@ function openEdit(id) {
   document.getElementById('edit-date').value          = post.date     || '';
   document.getElementById('edit-tags').value          = (post.tags||[]).join(', ');
   document.getElementById('edit-location').value      = post.location || '';
-  document.getElementById('edit-image').value         = post.image    || '';
+  document.getElementById('post-img').value            = post.image    || '';
   document.getElementById('edit-published').checked   = !!post.published;
   document.getElementById('edit-featured').checked    = !!post.featured;
   const prev = document.getElementById('post-img-preview');
@@ -750,7 +750,7 @@ async function savePost() {
     date:      document.getElementById('edit-date').value,
     location:  document.getElementById('edit-location').value.trim() || null,
     tags:      document.getElementById('edit-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
-    image:     document.getElementById('edit-image').value || null,
+    image:     document.getElementById('post-img').value || null,
     published: document.getElementById('edit-published').checked,
     featured:  document.getElementById('edit-featured').checked
   };
