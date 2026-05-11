@@ -1,5 +1,5 @@
 {
-  "name": "pause-and-exist-blog",
+  "name": "daily-dose-blog",
   "version": "1.0.0",
   "description": "A mindful blog",
   "main": "server.js",
