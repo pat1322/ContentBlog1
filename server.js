@@ -104,6 +104,9 @@ const upload = multer({
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Friendly admin URL: /admin (and /admin/) serve the admin panel
+app.get(['/admin', '/admin/'], (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 function requireAuth(req, res, next) {
