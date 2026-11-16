@@ -14,7 +14,7 @@
 - Hero photo slider showing the three latest (featured first) posts
 - Journal-cover splash screen, blog / my story entry tiles, latest posts list, photo strip
 - Archive with search and tag filters, and a "my story" page
-- Admin panel for managing all content — no database required
+- Admin panel for managing all content and images — no database required
 - Image uploads stored on a persistent volume
 
 ---
@@ -81,6 +81,18 @@ Protected by password (default: `admin123`). Session persists via `sessionStorag
 **Site Settings tab**
 - Edit blog title, tagline, author name, author bio
 - Change admin password (with confirm field; signs you out after saving)
+
+**Homepage tab**
+- Every text on the home page: menu labels, headline, button labels, tile titles/descriptions, about quote, archive heading, strip captions, footer line
+- Every image: hero slides, picture tiles, about photo, photo strip, placeholder photos for posts without a cover
+- Each image can be uploaded/replaced, removed (the section hides cleanly), or reset to the original; photo lists can be reordered
+- Social links (an empty link hides its icon)
+
+**My Story tab**
+- Page heading, photo, intro, story text, sign-off, button label
+
+**Splash Screen tab**
+- Turn the journal cover on/off, show/hide the date, button text, hint text
 
 **Contributors tab**
 - Add/remove contributors with name, role, and optional avatar image

@@ -24,10 +24,51 @@ const DEFAULT_BLOG = {
     adminPassword: "admin123",
     quote: {
       text:        "Not everything needs to be optimized. Not every moment has to lead somewhere. Sometimes the most radical act is to simply pause.",
-      attribution: "— luan's journal",
-      image:       null
+      attribution: "— Luan's Journal",
+      image:       "/img/strip-7.jpg"
     },
-    contributors:  []
+    contributors:  [],
+
+    // ── Everything below is editable in the admin panel. An empty string ("") or empty
+    //    list means "removed / hidden"; a missing value falls back to these defaults.
+    heroButton:    "Read more",
+    nav: { home: "Home", about: "About", archive: "Archive", categories: "Categories", contact: "Contact" },
+    slides: [
+      { image: "/img/hero-1.jpg", title: "a quiet morning" },
+      { image: "/img/hero-2.jpg", title: "the long way home" },
+      { image: "/img/hero-3.jpg", title: "rainy day thoughts" }
+    ],
+    slideNote:     "new chapter soon",
+    tiles: [
+      { image: "/img/tile-blog.jpg",  title: "the blog", text: "personal thoughts, life updates, and more.", button: "Explore",    link: "#/archive" },
+      { image: "/img/tile-story.jpg", title: "my story", text: "a little about me, my journey, and goals.",  button: "Learn more", link: "#/story" }
+    ],
+    latestHeading: "Latest posts",
+    about: {
+      image:  "/img/strip-5.jpg",
+      line:   "i write to slow down, to remember, and to notice the small things.",
+      button: "Read my story"
+    },
+    archive: { heading: "the archive." },
+    story: {
+      heading: "my story.",
+      image:   "/img/tile-story.jpg",
+      lead:    "",
+      body:    "this journal is where i keep the small moments: the slow mornings, the half-finished thoughts, and the things that made a day feel like mine.",
+      signoff: "— Luan",
+      button:  "Read the journal"
+    },
+    strip: {
+      caption: "little moments, lately",
+      hint:    "hover to see them in colour",
+      images:  ["/img/strip-1.jpg", "/img/strip-2.jpg", "/img/strip-3.jpg", "/img/strip-4.jpg",
+                "/img/strip-5.jpg", "/img/strip-6.jpg", "/img/strip-7.jpg", "/img/strip-8.jpg"]
+    },
+    postPlaceholders: ["/img/strip-1.jpg", "/img/strip-2.jpg", "/img/strip-3.jpg", "/img/strip-4.jpg",
+                       "/img/strip-5.jpg", "/img/strip-6.jpg", "/img/strip-7.jpg", "/img/strip-8.jpg"],
+    footer: { line: "create, reflect, and bloom." },
+    social: { instagram: "", pinterest: "", youtube: "", x: "" },
+    splash: { enabled: true, showDate: true, button: "Open the journal", hint: "tap anywhere to open" }
   },
   posts: [
     {
@@ -82,9 +123,26 @@ if (!fs.existsSync(BLOG_FILE)) {
   } catch (e) { console.error('Branding migration skipped:', e.message); }
 })();
 
+// Fill in any setting that is missing (undefined/null) from the defaults, recursing into
+// plain objects. Values that were deliberately cleared ("" or []) are kept as-is.
+function withDefaults(value, defaults) {
+  if (value === undefined || value === null) return structuredClone(defaults);
+  const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+  if (isObj(value) && isObj(defaults)) {
+    const out = { ...value };
+    for (const k of Object.keys(defaults)) out[k] = withDefaults(value[k], defaults[k]);
+    return out;
+  }
+  return value;
+}
+
 function readBlog() {
-  try { return JSON.parse(fs.readFileSync(BLOG_FILE, 'utf8')); }
-  catch { return DEFAULT_BLOG; }
+  let blog;
+  try { blog = JSON.parse(fs.readFileSync(BLOG_FILE, 'utf8')); }
+  catch { blog = structuredClone(DEFAULT_BLOG); }
+  blog.site  = withDefaults(blog.site, DEFAULT_BLOG.site);
+  blog.posts = blog.posts || [];
+  return blog;
 }
 function writeBlog(data) {
   fs.writeFileSync(BLOG_FILE, JSON.stringify(data, null, 2));
@@ -102,7 +160,20 @@ const upload = multer({
   }
 });
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+
+// The home page gets the site title and splash setting baked in, so the browser tab shows
+// the right title and a disabled splash never flashes before the data loads.
+const INDEX_FILE = path.join(__dirname, 'public', 'index.html');
+app.get(['/', '/index.html'], (_req, res) => {
+  const site = readBlog().site;
+  const escHtml = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  let html = fs.readFileSync(INDEX_FILE, 'utf8');
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${escHtml(site.title || "Luan's Journal")}</title>`);
+  if (site.splash && site.splash.enabled === false) html = html.replace('<html lang="en">', '<html lang="en" data-splash="off">');
+  res.type('html').send(html);
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Friendly admin URL: /admin (and /admin/) serve the admin panel
@@ -113,6 +184,12 @@ function requireAuth(req, res, next) {
   if (req.headers['x-admin-token'] === readBlog().site.adminPassword) return next();
   res.status(401).json({ error: 'Unauthorized' });
 }
+
+// Built-in defaults, so the admin panel can offer "Reset to default" for each image/text.
+app.get('/api/admin/defaults', requireAuth, (_req, res) => {
+  const { adminPassword, ...site } = DEFAULT_BLOG.site;
+  res.json(site);
+});
 
 app.get('/api/blog', (_req, res) => {
   const blog = readBlog();

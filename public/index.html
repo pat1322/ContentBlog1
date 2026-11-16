@@ -111,7 +111,7 @@
     .hd-nav a:hover, .hd-nav a.on, .hd-right a:hover { border-color: var(--wine); }
     .logo {
       font-family: var(--display); font-weight: 400; letter-spacing: -.035em;
-      font-size: clamp(1.6rem, 2.6vw, 2.15rem); line-height: 1; text-transform: lowercase;
+      font-size: clamp(1.6rem, 2.6vw, 2.15rem); line-height: 1;
       white-space: nowrap;
     }
     .hd-right { display: flex; justify-content: flex-end; align-items: center; gap: 1.4rem; }
@@ -132,7 +132,7 @@
     }
     .hero-h {
       font-weight: 400; letter-spacing: -.055em; line-height: .9;
-      font-size: clamp(3.2rem, 7vw, 6.6rem); text-transform: lowercase;
+      font-size: clamp(3.2rem, 7vw, 6.6rem);
     }
     .hero-h span { display: block; white-space: nowrap; }
     .hero-sub { font-family: var(--mono); font-size: clamp(.86rem, 1.2vw, 1rem); margin: 2rem 0 2.6rem; max-width: 34ch; line-height: 1.6; }
@@ -207,7 +207,7 @@
     .about-grid .duo { aspect-ratio: 3 / 4; }
     .about-text blockquote {
       font-weight: 300; letter-spacing: -.04em; line-height: 1.05;
-      font-size: clamp(2rem, 4.4vw, 3.9rem); margin-bottom: 2rem; text-transform: lowercase;
+      font-size: clamp(2rem, 4.4vw, 3.9rem); margin-bottom: 2rem;
     }
     .about-text p { font-family: var(--mono); font-size: .9rem; line-height: 1.8; max-width: 52ch; margin-bottom: 2rem; }
 
@@ -235,7 +235,7 @@
 
     /* ─── PAGE HEAD (archive / story) ────────────── */
     .page-head { padding: clamp(3rem, 7vw, 5.5rem) 0 2.5rem; }
-    .page-head h1 { font-weight: 400; letter-spacing: -.05em; line-height: .95; font-size: clamp(2.8rem, 7vw, 5.6rem); text-transform: lowercase; }
+    .page-head h1 { font-weight: 400; letter-spacing: -.05em; line-height: .95; font-size: clamp(2.8rem, 7vw, 5.6rem); }
     .page-head p { font-family: var(--mono); font-size: .92rem; margin-top: 1.3rem; }
 
     .filters { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; padding: 1.3rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 1rem; }
@@ -298,6 +298,17 @@
     .card .mono { font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; }
     .card h3 { font-weight: 400; font-size: 1.35rem; letter-spacing: -.025em; line-height: 1.2; margin: .35rem 0 .4rem; }
     .card p { font-family: var(--mono); font-size: .8rem; line-height: 1.6; opacity: .85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ─── REMOVED-IMAGE LAYOUTS ─────────────────── */
+    .hero.solo { grid-template-columns: minmax(0, 1fr); }
+    .hero.solo .slider, .hero.solo .slider-ctl { display: none; }
+    .about-grid.solo, .story.solo { grid-template-columns: minmax(0, 1fr); }
+    .about-grid.solo .about-text { max-width: 900px; }
+    .quote-band.solo { grid-template-columns: minmax(0, 1fr); }
+    .quote-band.solo .quote-txt { border-left: 0; }
+    .doors.one { grid-template-columns: minmax(0, 1fr); }
+    .doors.one .door { border-left: 0; padding: 0; }
+    .ft-social:empty { display: none; }
 
     /* ─── SPLASH: the journal cover ──────────────── */
     /* the site opens as a closed wine-cloth journal; opening it swings the cover off its spine */
@@ -417,13 +428,13 @@
     <span class="ribbon" aria-hidden="true"></span>
     <div class="cover-inner">
       <p class="cover-date" id="cover-date"></p>
-      <div class="cover-title" id="cover-title" aria-label="luan’s journal."></div>
+      <div class="cover-title" id="cover-title" aria-label="Luan’s Journal"></div>
       <p class="cover-tag" id="cover-tag">thoughts, dreams, and everything in between.</p>
-      <button class="cover-btn" id="cover-open" type="button">Open the journal
+      <button class="cover-btn" id="cover-open" type="button"><span id="cover-btn-text">Open the journal</span>
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M0 5h13M9 1l4 4-4 4"/></svg>
       </button>
     </div>
-    <p class="cover-foot"><span>tap anywhere to open</span></p>
+    <p class="cover-foot"><span id="cover-hint">tap anywhere to open</span></p>
   </div>
 </div>
 <script>
@@ -431,7 +442,7 @@
   (function () {
     let seen = false;
     try { seen = sessionStorage.getItem('lj-opened') === '1'; } catch (e) {}
-    if (seen) { document.getElementById('splash').remove(); return; }
+    if (seen || document.documentElement.dataset.splash === 'off') { document.getElementById('splash').remove(); return; }
     document.documentElement.classList.add('splashing');
   })();
 </script>
@@ -445,14 +456,14 @@
       <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M0 1h20M0 7h20M0 13h20"/></svg>
     </button>
     <ul class="hd-nav" id="hd-nav">
-      <li><a href="#/" data-nav="home">Home</a></li>
-      <li><a href="#/story" data-nav="story">About</a></li>
-      <li><a href="#/archive" data-nav="archive">Archive</a></li>
-      <li><a href="#/archive?tags" data-nav="tags">Categories</a></li>
+      <li><a href="#/" data-nav="home" data-label="nav.home">Home</a></li>
+      <li><a href="#/story" data-nav="story" data-label="nav.about">About</a></li>
+      <li><a href="#/archive" data-nav="archive" data-label="nav.archive">Archive</a></li>
+      <li><a href="#/archive?tags" data-nav="tags" data-label="nav.categories">Categories</a></li>
     </ul>
-    <a href="#/" class="logo" data-title>luan’s journal.</a>
+    <a href="#/" class="logo" data-title>Luan’s Journal</a>
     <div class="hd-right">
-      <a href="#contact" class="contact">Contact</a>
+      <a href="#contact" class="contact" data-label="nav.contact">Contact</a>
       <span class="hd-sep"></span>
       <a href="#/archive?search" class="icon-btn" aria-label="Search posts">
         <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8.5" cy="8.5" r="6.5"/><path d="M13.3 13.3 19 19"/></svg>
@@ -464,11 +475,11 @@
 <main>
 <!-- ═════════ HOME ═════════ -->
 <section class="view" id="v-home">
-  <div class="wrap hero">
+  <div class="wrap hero" id="hero">
     <div>
       <h1 class="hero-h" id="hero-h"><span>just another</span><span>chapter.</span></h1>
       <p class="hero-sub" id="hero-sub">thoughts, dreams, and everything in between.</p>
-      <a class="link" href="#/archive">Read more <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
+      <a class="link" href="#/archive"><span data-label="heroButton">Read more</span> <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
     </div>
     <div class="slider" id="slider" aria-roledescription="carousel"></div>
     <div class="slider-ctl">
@@ -479,35 +490,22 @@
 
   <div class="wrap">
 
-    <div class="doors">
-      <article class="door">
-        <a href="#/archive" tabindex="-1" aria-hidden="true"><div class="duo"><img src="/img/tile-blog.jpg" alt="" loading="lazy"><span class="tag-card">the blog</span></div></a>
-        <h2>the blog</h2>
-        <p>personal thoughts, life updates, and more.</p>
-        <a class="link" href="#/archive">Explore <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
-      </article>
-      <article class="door">
-        <a href="#/story" tabindex="-1" aria-hidden="true"><div class="duo"><img src="/img/tile-story.jpg" alt="" loading="lazy"><span class="tag-card">my story</span></div></a>
-        <h2>my story</h2>
-        <p>a little about me, my journey, and goals.</p>
-        <a class="link" href="#/story">Learn more <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
-      </article>
-    </div>
+    <div class="doors" id="doors"></div>
 
     <div class="sec-head">
-      <h2>Latest posts</h2><div class="rule"></div>
+      <h2 data-label="latestHeading">Latest posts</h2><div class="rule"></div>
       <a class="link" href="#/archive" style="border:0;padding:0">View all <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
     </div>
     <ul class="rows" id="latest"></ul>
   </div>
 
   <section class="about-band">
-    <div class="wrap about-grid">
-      <a href="#/story" tabindex="-1" aria-hidden="true"><div class="duo"><img src="/img/strip-5.jpg" alt="" loading="lazy"></div></a>
+    <div class="wrap about-grid" id="about-grid">
+      <a href="#/story" tabindex="-1" aria-hidden="true" id="about-img"></a>
       <div class="about-text">
-        <blockquote id="about-line">i write to slow down, to remember, and to notice the small things.</blockquote>
+        <blockquote id="about-line"></blockquote>
         <p id="about-bio"></p>
-        <a class="link" href="#/story">Read my story <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
+        <a class="link" href="#/story"><span data-label="about.button">Read my story</span> <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M0 5h13M9 1l4 4-4 4"/></svg></a>
       </div>
     </div>
   </section>
@@ -517,7 +515,7 @@
 <section class="view" id="v-archive">
   <div class="wrap">
     <div class="page-head">
-      <h1>the archive.</h1>
+      <h1 data-label="archive.heading">the archive.</h1>
       <p id="archive-count"></p>
     </div>
     <div class="filters">
@@ -534,9 +532,9 @@
 <!-- ═════════ STORY ═════════ -->
 <section class="view" id="v-story">
   <div class="wrap">
-    <div class="page-head"><h1>my story.</h1></div>
-    <div class="story">
-      <div class="duo"><img src="/img/tile-story.jpg" alt=""></div>
+    <div class="page-head"><h1 data-label="story.heading">my story.</h1></div>
+    <div class="story" id="story">
+      <div class="duo" id="story-img"></div>
       <div class="story-body" id="story-body"></div>
     </div>
   </div>
@@ -581,36 +579,37 @@
 </main>
 
 <!-- ═════════ STRIP + FOOTER ═════════ -->
-<section aria-label="little moments">
-  <div class="wrap strip-cap"><span>little moments, lately</span><span>hover to see them in colour</span></div>
+<section aria-label="Photo strip" id="strip-sec">
+  <div class="wrap strip-cap"><span data-label="strip.caption">little moments, lately</span><span data-label="strip.hint">hover to see them in colour</span></div>
   <div class="strip" id="strip"></div>
 </section>
 
 <footer class="site" id="contact">
   <div class="wrap">
     <div class="ft">
-      <a href="#/" class="logo" data-title>luan’s journal.</a>
-      <p class="ft-mid">create, reflect, and bloom.</p>
-      <div class="ft-social">
-        <span class="hd-sep"></span>
-        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r=".9" fill="currentColor" stroke="none"/></svg></a>
-        <a href="https://pinterest.com" target="_blank" rel="noopener" aria-label="Pinterest"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.2 2C6.7 2 4 5.9 4 9.2c0 2 .8 3.8 2.4 4.4.3.1.5 0 .6-.3l.2-.9c.1-.3 0-.4-.2-.7-.5-.6-.8-1.3-.8-2.4 0-3 2.3-5.8 6-5.8 3.3 0 5.1 2 5.1 4.7 0 3.5-1.6 6.5-3.9 6.5-1.3 0-2.2-1-1.9-2.3.4-1.5 1.1-3.2 1.1-4.3 0-1-.5-1.8-1.6-1.8-1.3 0-2.3 1.3-2.3 3.1 0 1.1.4 1.9.4 1.9l-1.5 6.4c-.4 1.9-.1 4.2 0 4.4 0 .1.2.2.3.1.1-.2 1.6-2 2.1-3.8l.8-3.2c.4.8 1.6 1.4 2.9 1.4 3.8 0 6.4-3.5 6.4-8.1C20.1 5.3 17 2 12.2 2Z"/></svg></a>
-        <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 7.2a2.8 2.8 0 0 0-2-2C18.8 4.7 12 4.7 12 4.7s-6.8 0-8.5.5a2.8 2.8 0 0 0-2 2C1 8.9 1 12 1 12s0 3.1.5 4.8a2.8 2.8 0 0 0 2 2c1.7.5 8.5.5 8.5.5s6.8 0 8.5-.5a2.8 2.8 0 0 0 2-2c.5-1.7.5-4.8.5-4.8s0-3.1-.5-4.8ZM9.8 15.1V8.9l5.7 3.1-5.7 3.1Z"/></svg></a>
-        <a href="https://x.com" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 3.5 20.5 20.5M20.5 3.5 3.5 20.5"/></svg></a>
-      </div>
+      <a href="#/" class="logo" data-title>Luan’s Journal</a>
+      <p class="ft-mid" data-label="footer.line">create, reflect, and bloom.</p>
+      <div class="ft-social" id="social"></div>
     </div>
-    <p class="copy"><span id="copy">© 2026 luan’s journal. all rights reserved.</span><a href="/admin">admin</a></p>
+    <p class="copy"><span id="copy">© 2026 Luan’s Journal. All rights reserved.</span><a href="/admin">admin</a></p>
   </div>
 </footer>
 
 <script>
 /* ═══════════════════════════════════════════════ */
-const HERO_IMGS  = ['/img/hero-1.jpg', '/img/hero-2.jpg', '/img/hero-3.jpg'];
-const STRIP_IMGS = Array.from({ length: 8 }, (_, i) => `/img/strip-${i + 1}.jpg`);
+/* Everything on this page comes from the site settings edited in /admin.
+   An empty string or empty list in the settings means that piece is removed. */
 const ARROW = '<svg width="16" height="11" viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M0 5h13M9 1l4 4-4 4"/></svg>';
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SOCIAL_ICONS = {
+  instagram: ['Instagram', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r=".9" fill="currentColor" stroke="none"/></svg>'],
+  pinterest: ['Pinterest', '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.2 2C6.7 2 4 5.9 4 9.2c0 2 .8 3.8 2.4 4.4.3.1.5 0 .6-.3l.2-.9c.1-.3 0-.4-.2-.7-.5-.6-.8-1.3-.8-2.4 0-3 2.3-5.8 6-5.8 3.3 0 5.1 2 5.1 4.7 0 3.5-1.6 6.5-3.9 6.5-1.3 0-2.2-1-1.9-2.3.4-1.5 1.1-3.2 1.1-4.3 0-1-.5-1.8-1.6-1.8-1.3 0-2.3 1.3-2.3 3.1 0 1.1.4 1.9.4 1.9l-1.5 6.4c-.4 1.9-.1 4.2 0 4.4 0 .1.2.2.3.1.1-.2 1.6-2 2.1-3.8l.8-3.2c.4.8 1.6 1.4 2.9 1.4 3.8 0 6.4-3.5 6.4-8.1C20.1 5.3 17 2 12.2 2Z"/></svg>'],
+  youtube:   ['YouTube', '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 7.2a2.8 2.8 0 0 0-2-2C18.8 4.7 12 4.7 12 4.7s-6.8 0-8.5.5a2.8 2.8 0 0 0-2 2C1 8.9 1 12 1 12s0 3.1.5 4.8a2.8 2.8 0 0 0 2 2c1.7.5 8.5.5 8.5.5s6.8 0 8.5-.5a2.8 2.8 0 0 0 2-2c.5-1.7.5-4.8.5-4.8s0-3.1-.5-4.8ZM9.8 15.1V8.9l5.7 3.1-5.7 3.1Z"/></svg>'],
+  x:         ['X', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 3.5 20.5 20.5M20.5 3.5 3.5 20.5"/></svg>']
+};
 
 let BLOG = { site: {}, posts: [] };
+let SITE = {};
 let PUB = [];
 let slideTimer = null, slideIdx = 0;
 let activeTag = '';
@@ -618,29 +617,44 @@ let activeTag = '';
 /* ── BOOT ────────────────────────────────────── */
 async function boot() {
   try { BLOG = await fetch('/api/blog').then(r => r.json()); } catch {}
-  BLOG.site = BLOG.site || {};
+  SITE = BLOG.site || {};
   PUB = (BLOG.posts || []).filter(p => p.published)
           .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-  const s = BLOG.site;
-  const brand = displayTitle(s.title || "Luan's Journal");
+  const brand = displayTitle(SITE.title || "Luan's Journal");
   document.querySelectorAll('[data-title]').forEach(el => el.textContent = brand);
-  document.title = s.title || "Luan's Journal";
-  document.getElementById('copy').textContent = `© ${new Date().getFullYear()} ${brand} all rights reserved.`;
-  if (s.tagline) document.getElementById('hero-sub').textContent = s.tagline.toLowerCase();
-  if (s.heroTitle) {
-    const words = s.heroTitle.trim().split(/\s+/);
-    const cut = Math.max(1, words.length - 1);
-    document.getElementById('hero-h').innerHTML =
-      `<span>${esc(words.slice(0, cut).join(' '))}</span><span>${esc(words.slice(cut).join(' '))}</span>`;
-  }
-  document.getElementById('about-bio').textContent = s.bio || '';
+  document.title = SITE.title || "Luan's Journal";
+  document.getElementById('copy').textContent =
+    `© ${new Date().getFullYear()} ${brand}${/[.!?]$/.test(brand) ? '' : '.'} All rights reserved.`;
+
+  // simple text labels: <el data-label="path.to.setting">
+  document.querySelectorAll('[data-label]').forEach(el => {
+    const v = get(SITE, el.dataset.label);
+    if (typeof v === 'string') { el.textContent = v; el.hidden = !v; }
+  });
+
+  document.getElementById('hero-sub').textContent = SITE.tagline || '';
+  const words = (SITE.heroTitle || '').trim().split(/\s+/).filter(Boolean);
+  const cut = Math.max(1, words.length - 1);
+  document.getElementById('hero-h').innerHTML = words.length
+    ? `<span>${esc(words.slice(0, cut).join(' '))}</span>${words.length > 1 ? `<span>${esc(words.slice(cut).join(' '))}</span>` : ''}`
+    : '';
 
   renderSlider();
+  renderDoors();
   renderLatest();
+  renderAbout();
   renderStrip();
+  renderSocial();
   route();
-  setCover(brand, s.tagline);
+  setCover(brand, SITE.tagline);
+  const sp = SITE.splash || {};
+  const btn = document.getElementById('cover-btn-text');
+  if (btn && sp.button) btn.textContent = sp.button;
+  const hint = document.getElementById('cover-hint');
+  if (hint) { hint.textContent = sp.hint || ''; hint.hidden = !sp.hint; }
+  const date = document.getElementById('cover-date');
+  if (date) date.hidden = sp.showDate === false;
   if (!document.getElementById('splash')) revealPage();
 }
 
@@ -652,16 +666,17 @@ function revealPage() {
 function setCover(title, tagline) {
   const el = document.getElementById('cover-title');
   if (!el) return;
-  if (el.getAttribute('aria-label') !== title || !el.children.length) el.innerHTML = [...title].map((ch, i) => `<span aria-hidden="true" style="--i:${i}">${esc(ch)}</span>`).join('');
+  if (el.getAttribute('aria-label') !== title || !el.children.length)
+    el.innerHTML = [...title].map((ch, i) => `<span aria-hidden="true" style="--i:${i}">${esc(ch)}</span>`).join('');
   el.setAttribute('aria-label', title);
-  if (tagline) document.getElementById('cover-tag').textContent = tagline.toLowerCase();
+  if (tagline !== undefined) document.getElementById('cover-tag').textContent = tagline || '';
 }
 (function initSplash() {
   const splash = document.getElementById('splash');
   if (!splash) return;
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toLowerCase();
   document.getElementById('cover-date').textContent = `today’s page — ${today}`;
-  setCover('luan’s journal.');
+  setCover('Luan’s Journal');
   let opened = false;
   const open = () => {
     if (opened) return;
@@ -713,32 +728,33 @@ function route() {
 
 /* ── HERO SLIDER ─────────────────────────────── */
 function renderSlider() {
-  const featured = [...PUB].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)).slice(0, 3);
-  const fallbacks = [
-    { title: 'a quiet morning', note: 'new chapter soon' },
-    { title: 'the long way home', note: 'new chapter soon' },
-    { title: 'rainy day thoughts', note: 'new chapter soon' }
-  ];
-  const slides = HERO_IMGS.map((img, i) => {
-    const p = featured[i];
+  const defs = SITE.slides || [];
+  const posts = [...PUB].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)).slice(0, defs.length);
+  // a slide shows a post (its cover, else the slide photo) or, with fewer posts, the slide's own title
+  const slides = defs.map((d, i) => {
+    const p = posts[i];
+    const img = (p && p.image) || d.image || '';
+    if (!img) return null;
     return p
-      ? { img: p.image || img, title: p.title, note: fmtShort(p.date), href: `#/post/${encodeURIComponent(p.id)}` }
-      : { img, title: fallbacks[i].title, note: fallbacks[i].note, href: '#/archive' };
-  });
+      ? { img, title: p.title, note: fmtShort(p.date), href: `#/post/${encodeURIComponent(p.id)}` }
+      : { img, title: d.title || '', note: SITE.slideNote || '', href: '#/archive' };
+  }).filter(Boolean);
 
+  document.getElementById('hero').classList.toggle('solo', !slides.length);
   document.getElementById('slider').innerHTML = slides.map((s, i) => `
     <div class="slide${i === 0 ? ' on' : ''}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${slides.length}">
       <a href="${s.href}" tabindex="${i === 0 ? 0 : -1}">
         <div class="duo"><img src="${esc(s.img)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></div>
-        <div class="slide-card">
-          <span class="mono">${esc(s.note)}</span>
+        ${s.title ? `<div class="slide-card">
+          ${s.note ? `<span class="mono">${esc(s.note)}</span>` : ''}
           <h3>${esc(s.title)}</h3>
-          <span class="link">Read more ${ARROW}</span>
-        </div>
+          <span class="link">${esc(SITE.heroButton || 'Read more')} ${ARROW}</span>
+        </div>` : ''}
       </a>
     </div>`).join('');
-  document.getElementById('dots').innerHTML = slides.map((_, i) =>
-    `<button class="dot${i === 0 ? ' on' : ''}" aria-label="Show slide ${i + 1}" data-i="${i}"></button>`).join('');
+  document.getElementById('dots').innerHTML = slides.length > 1 ? slides.map((_, i) =>
+    `<button class="dot${i === 0 ? ' on' : ''}" aria-label="Show slide ${i + 1}" data-i="${i}"></button>`).join('') : '';
+  document.getElementById('count').textContent = slides.length > 1 ? `01 / ${pad(slides.length)}` : '';
   document.querySelectorAll('.dot').forEach(d => d.addEventListener('click', () => { goSlide(+d.dataset.i); startSlider(); }));
   const sl = document.getElementById('slider');
   sl.addEventListener('mouseenter', stopSlider);
@@ -747,6 +763,7 @@ function renderSlider() {
 }
 function goSlide(i) {
   const slides = document.querySelectorAll('.slide');
+  if (!slides.length) return;
   slideIdx = (i + slides.length) % slides.length;
   slides.forEach((s, j) => {
     s.classList.toggle('on', j === slideIdx);
@@ -755,20 +772,41 @@ function goSlide(i) {
   document.querySelectorAll('.dot').forEach((d, j) => d.classList.toggle('on', j === slideIdx));
   document.getElementById('count').textContent = `${pad(slideIdx + 1)} / ${pad(slides.length)}`;
 }
-function startSlider() { stopSlider(); if (!REDUCED) slideTimer = setInterval(() => goSlide(slideIdx + 1), 6000); }
+function startSlider() {
+  stopSlider();
+  if (!REDUCED && document.querySelectorAll('.slide').length > 1) slideTimer = setInterval(() => goSlide(slideIdx + 1), 6000);
+}
 function stopSlider() { clearInterval(slideTimer); }
+
+/* ── ENTRY TILES ─────────────────────────────── */
+function renderDoors() {
+  const tiles = (SITE.tiles || []).filter(t => t.title || t.text || t.image);
+  const el = document.getElementById('doors');
+  el.hidden = !tiles.length;
+  el.classList.toggle('one', tiles.length === 1);
+  el.innerHTML = tiles.map(t => {
+    const href = esc(t.link || '#/archive');
+    return `<article class="door">
+      ${t.image ? `<a href="${href}" tabindex="-1" aria-hidden="true"><div class="duo"><img src="${esc(t.image)}" alt="" loading="lazy">${t.title ? `<span class="tag-card">${esc(t.title)}</span>` : ''}</div></a>` : ''}
+      ${t.title ? `<h2>${esc(t.title)}</h2>` : ''}
+      ${t.text ? `<p>${esc(t.text)}</p>` : ''}
+      ${t.button ? `<a class="link" href="${href}">${esc(t.button)} ${ARROW}</a>` : ''}
+    </article>`;
+  }).join('');
+}
 
 /* ── LISTS ───────────────────────────────────── */
 function rowHTML(p) {
   const d = new Date((p.date || '') + 'T00:00:00');
   const ok = !isNaN(d);
+  const img = imgFor(p);
   return `<li class="row"><a href="#/post/${encodeURIComponent(p.id)}">
     <div class="row-date">${ok ? d.toLocaleString('en-US', { month: 'short' }) : ''}<br>${ok ? pad(d.getDate()) : ''}</div>
     <div class="row-body">
       <div class="row-title">${esc(p.title.toLowerCase())}</div>
       <div class="row-sub">${esc((p.subtitle || '').toLowerCase())}</div>
     </div>
-    <div class="duo row-thumb"><img src="${esc(imgFor(p))}" alt="" loading="lazy"></div>
+    ${img ? `<div class="duo row-thumb"><img src="${esc(img)}" alt="" loading="lazy"></div>` : '<span></span>'}
     <span class="row-arrow">${ARROW}</span>
   </a></li>`;
 }
@@ -798,22 +836,46 @@ function filterArchive() {
 }
 document.getElementById('q').addEventListener('input', filterArchive);
 
-/* ── STORY ───────────────────────────────────── */
-function renderStory() {
-  const s = BLOG.site;
-  const q = s.quote || {};
-  document.getElementById('story-body').innerHTML = `
-    <p class="big">${esc(s.bio || 'a little about me, my journey, and goals.')}</p>
-    ${q.text ? `<p>${esc(q.text)}</p>` : ''}
-    <p>this journal is where i keep the small moments: the slow mornings, the half-finished thoughts, and the things that made a day feel like mine.</p>
-    <p class="story-sign">— ${esc((s.author || 'luan').toLowerCase())}</p>
-    <div style="margin-top:2.5rem"><a class="link" href="#/archive">Read the journal ${ARROW}</a></div>`;
+/* ── ABOUT BAND ──────────────────────────────── */
+function renderAbout() {
+  const a = SITE.about || {};
+  document.getElementById('about-img').innerHTML = a.image ? `<div class="duo"><img src="${esc(a.image)}" alt="" loading="lazy"></div>` : '';
+  document.getElementById('about-img').hidden = !a.image;
+  document.getElementById('about-grid').classList.toggle('solo', !a.image);
+  const line = document.getElementById('about-line');
+  line.textContent = a.line || ''; line.hidden = !a.line;
+  const bio = document.getElementById('about-bio');
+  bio.textContent = SITE.bio || ''; bio.hidden = !SITE.bio;
 }
 
-/* ── STRIP ───────────────────────────────────── */
+/* ── STORY ───────────────────────────────────── */
+function renderStory() {
+  const st = SITE.story || {};
+  document.getElementById('story-img').innerHTML = st.image ? `<img src="${esc(st.image)}" alt="">` : '';
+  document.getElementById('story-img').hidden = !st.image;
+  document.getElementById('story').classList.toggle('solo', !st.image);
+  const lead = st.lead || SITE.bio || '';
+  const paras = (st.body || '').split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+  document.getElementById('story-body').innerHTML = `
+    ${lead ? `<p class="big">${esc(lead)}</p>` : ''}
+    ${paras.map(p => `<p>${esc(p)}</p>`).join('')}
+    ${st.signoff ? `<p class="story-sign">${esc(st.signoff)}</p>` : ''}
+    ${st.button ? `<div style="margin-top:2.5rem"><a class="link" href="#/archive">${esc(st.button)} ${ARROW}</a></div>` : ''}`;
+}
+
+/* ── STRIP + SOCIAL ──────────────────────────── */
 function renderStrip() {
-  document.getElementById('strip').innerHTML = STRIP_IMGS.map(src =>
-    `<div class="duo"><img src="${src}" alt="" loading="lazy"></div>`).join('');
+  const imgs = ((SITE.strip || {}).images || []).filter(Boolean);
+  document.getElementById('strip-sec').hidden = !imgs.length;
+  const strip = document.getElementById('strip');
+  strip.style.gridTemplateColumns = `repeat(${Math.min(imgs.length, 8) || 1}, 1fr)`;
+  strip.innerHTML = imgs.map(src => `<div class="duo"><img src="${esc(src)}" alt="" loading="lazy"></div>`).join('');
+}
+function renderSocial() {
+  const so = SITE.social || {};
+  const links = Object.keys(SOCIAL_ICONS).filter(k => so[k]).map(k =>
+    `<a href="${esc(safeUrl(so[k]))}" target="_blank" rel="noopener" aria-label="${SOCIAL_ICONS[k][0]}">${SOCIAL_ICONS[k][1]}</a>`);
+  document.getElementById('social').innerHTML = links.length ? `<span class="hd-sep"></span>${links.join('')}` : '';
 }
 
 /* ── SINGLE POST ─────────────────────────────── */
@@ -828,11 +890,13 @@ function renderPost(post) {
     post.location ? post.location.toLowerCase() : '',
     `${readTime(post.content)} min read`
   ].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('');
-  document.title = `${post.title} — ${BLOG.site.title || "Luan's Journal"}`;
+  document.title = `${post.title} — ${SITE.title || "Luan's Journal"}`;
 
   const cover = document.getElementById('p-cover');
+  const coverImg = imgFor(post);
+  cover.hidden = !coverImg;
   cover.classList.toggle('color', !!post.image);
-  cover.innerHTML = `<img src="${esc(imgFor(post))}" alt="">`;
+  cover.innerHTML = coverImg ? `<img src="${esc(coverImg)}" alt="">` : '';
 
   // body: blank-line separated paragraphs; "> " makes a pull quote
   const paras = (post.content || '').split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
@@ -863,37 +927,40 @@ function renderPost(post) {
   }
 
   // quote band
-  const q = BLOG.site.quote || {};
+  const q = SITE.quote || {};
   document.getElementById('p-quote').hidden = !q.text;
+  document.getElementById('p-quote').classList.toggle('solo', !q.image);
   document.getElementById('q-text').textContent = q.text || '';
-  document.getElementById('q-attr').textContent = (q.attribution || '').toLowerCase();
-  document.getElementById('q-img').innerHTML = `<img src="${esc(q.image || '/img/strip-7.jpg')}" alt="" loading="lazy">`;
+  document.getElementById('q-attr').textContent = q.attribution || '';
+  document.getElementById('q-img').hidden = !q.image;
+  document.getElementById('q-img').innerHTML = q.image ? `<img src="${esc(q.image)}" alt="" loading="lazy">` : '';
 
   // contributors
-  const cs = BLOG.site.contributors || [];
+  const cs = SITE.contributors || [];
   document.getElementById('contribs').hidden = !cs.length;
   document.getElementById('contrib-grid').innerHTML = cs.map(c => `
     <div class="person">
-      <div class="av">${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : esc((c.name || '?').charAt(0).toLowerCase())}</div>
-      <div><b>${esc((c.name || '').toLowerCase())}</b>${c.role ? `<small>${esc(c.role.toLowerCase())}</small>` : ''}</div>
+      <div class="av">${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : esc((c.name || '?').charAt(0))}</div>
+      <div><b>${esc(c.name || '')}</b>${c.role ? `<small>${esc(c.role)}</small>` : ''}</div>
     </div>`).join('');
 
   // author
-  const s = BLOG.site;
   document.getElementById('author').innerHTML = `
-    <div class="av">${esc((s.author || 'l').charAt(0).toLowerCase())}</div>
-    <div><b>written by ${esc((s.author || '').toLowerCase())}</b><small>${esc(s.bio || '')}</small></div>`;
+    <div class="av">${esc((SITE.author || 'L').charAt(0))}</div>
+    <div><b>written by ${esc(SITE.author || '')}</b><small>${esc(SITE.bio || '')}</small></div>`;
 
   // keep reading
   const others = PUB.filter(p => p.id !== post.id).slice(0, 3);
   document.getElementById('more').hidden = !others.length;
-  document.getElementById('more-cards').innerHTML = others.map(p => `
-    <a class="card" href="#/post/${encodeURIComponent(p.id)}">
-      <div class="duo"><img src="${esc(imgFor(p))}" alt="" loading="lazy"></div>
+  document.getElementById('more-cards').innerHTML = others.map(p => {
+    const img = imgFor(p);
+    return `<a class="card" href="#/post/${encodeURIComponent(p.id)}">
+      ${img ? `<div class="duo"><img src="${esc(img)}" alt="" loading="lazy"></div>` : ''}
       <span class="mono">${esc(fmtShort(p.date))}</span>
       <h3>${esc(p.title.toLowerCase())}</h3>
       <p>${esc((p.subtitle || '').toLowerCase())}</p>
-    </a>`).join('');
+    </a>`;
+  }).join('');
 }
 
 /* ── CHROME ──────────────────────────────────── */
@@ -910,14 +977,19 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 /* ── UTILS ───────────────────────────────────── */
-function displayTitle(t) {
-  t = String(t).trim().toLowerCase().replace(/'/g, '’');
-  return /[.!?]$/.test(t) ? t : t + '.';
-}
+function displayTitle(t) { return String(t).trim().replace(/'/g, '’'); }
+function get(obj, path) { return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj); }
 function imgFor(p) {
   if (p.image) return p.image;
+  const pool = (SITE.postPlaceholders || []).filter(Boolean);
+  if (!pool.length) return '';
   let h = 0; for (const c of String(p.id)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return STRIP_IMGS[h % STRIP_IMGS.length];
+  return pool[h % pool.length];
+}
+function safeUrl(u) {
+  u = String(u).trim();
+  if (/^(https?:|mailto:)/i.test(u)) return u;
+  return 'https://' + u.replace(/^\/+/, '');
 }
 function fmtShort(s) {
   const d = new Date((s || '') + 'T00:00:00');

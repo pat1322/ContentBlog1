@@ -269,6 +269,31 @@
     #toast.success { background:var(--green); }
     #toast.error   { background:var(--red); }
 
+    /* ─── EDITABLE CONTENT FORMS ──────────────── */
+    .admin-tabs { overflow-x: auto; }
+    .tab-btn { white-space: nowrap; }
+    .field-note { font-size: .78rem; color: var(--brown-soft); line-height: 1.6; margin: -.6rem 0 1.2rem; }
+    .img-field { display: flex; gap: 1.1rem; align-items: center; flex-wrap: wrap; }
+    .img-thumb {
+      width: 150px; aspect-ratio: 4 / 3; border-radius: 4px; background: var(--cream-2); border: 1px solid var(--border);
+      overflow: hidden; display: grid; place-items: center; font-size: .72rem; color: var(--brown-soft); flex-shrink: 0;
+    }
+    .img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .img-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: .8rem; margin-bottom: .9rem; }
+    .img-cell { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: white; }
+    .img-cell img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .img-cell-ctl { display: flex; justify-content: space-between; padding: .25rem .3rem; }
+    .img-cell-ctl button { background: none; border: 0; cursor: pointer; color: var(--brown-soft); font-size: .8rem; padding: .2rem .4rem; border-radius: 3px; }
+    .img-cell-ctl button:hover { background: var(--cream-2); color: var(--brown); }
+    .img-cell-ctl button.del:hover { background: var(--red); color: white; }
+    .img-cell-ctl button:disabled { opacity: .25; cursor: default; background: none; }
+    .list-item { border: 1px solid var(--border); border-radius: 6px; padding: 1.1rem 1.25rem .4rem; margin-bottom: 1rem; background: var(--cream); }
+    .list-item-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: .9rem; font-size: .74rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brown-soft); }
+    .list-item-hd div { display: flex; gap: .35rem; }
+    .save-bar { display: flex; align-items: center; gap: 1rem; margin-top: .5rem; }
+    .save-bar .dirty { font-size: .76rem; color: var(--brown-soft); }
+
     @media(max-width:540px) {
       .form-row { grid-template-columns:1fr; }
       .contrib-fields { grid-template-columns:1fr; }
@@ -323,6 +348,9 @@
   <div class="admin-tabs">
     <button class="tab-btn active" onclick="switchTab('posts')">Posts</button>
     <button class="tab-btn" onclick="switchTab('settings')">Site Settings</button>
+    <button class="tab-btn" onclick="switchTab('home')">Homepage</button>
+    <button class="tab-btn" onclick="switchTab('story')">My Story</button>
+    <button class="tab-btn" onclick="switchTab('splash')">Splash Screen</button>
     <button class="tab-btn" onclick="switchTab('contributors')">Contributors</button>
     <button class="tab-btn" onclick="switchTab('quote')">Quote Block</button>
   </div>
@@ -347,11 +375,11 @@
       <div class="s-card">
         <h3>Blog Details</h3>
         <div class="form-row">
-          <div class="form-group"><label>Blog Title</label><input type="text" id="s-title" placeholder="Luan's Journal"></div>
+          <div class="form-group"><label>Blog Title</label><input type="text" id="s-title" placeholder="Luan's Journal"><p class="field-note" style="margin:.4rem 0 0">Shown exactly as typed in the header, footer and splash screen.</p></div>
           <div class="form-group"><label>Author Name</label><input type="text" id="s-author" placeholder="Your Name"></div>
         </div>
-        <div class="form-group"><label>Tagline</label><input type="text" id="s-tagline" placeholder="A short description…"></div>
-        <div class="form-group"><label>Author Bio</label><textarea id="s-bio" rows="3" placeholder="A few words about yourself…"></textarea></div>
+        <div class="form-group"><label>Tagline</label><input type="text" id="s-tagline" placeholder="A short description…"><p class="field-note" style="margin:.4rem 0 0">Shown under the big headline and on the splash screen.</p></div>
+        <div class="form-group"><label>Author Bio</label><textarea id="s-bio" rows="3" placeholder="A few words about yourself…"></textarea><p class="field-note" style="margin:.4rem 0 0">Shown in the home page about section, under every post, and at the top of My Story (unless you write a separate intro there).</p></div>
       </div>
       <div class="s-card">
         <h3>Change Admin Password</h3>
@@ -367,6 +395,26 @@
         </p>
       </div>
       <button class="btn btn-dark" onclick="saveSettings()">Save Settings</button>
+    </div>
+
+    <!-- HOMEPAGE / STORY / SPLASH TABS (built from FORMS in the script) -->
+    <div class="tab-panel" id="tab-home">
+      <div class="section-header"><h2>Homepage</h2></div>
+      <p class="field-note" style="margin:0 0 1.5rem">Everything on the home page, the archive page heading, the photo strip and the footer. Remove an image to hide it on the site, or reset it to the original.</p>
+      <div id="form-home"></div>
+      <div class="save-bar"><button class="btn btn-dark" onclick="saveForm('home')">Save Homepage</button><span class="dirty" id="dirty-home"></span></div>
+    </div>
+    <div class="tab-panel" id="tab-story">
+      <div class="section-header"><h2>My Story</h2></div>
+      <p class="field-note" style="margin:0 0 1.5rem">The page visitors reach from “About” and “Learn more”.</p>
+      <div id="form-story"></div>
+      <div class="save-bar"><button class="btn btn-dark" onclick="saveForm('story')">Save My Story</button><span class="dirty" id="dirty-story"></span></div>
+    </div>
+    <div class="tab-panel" id="tab-splash">
+      <div class="section-header"><h2>Splash Screen</h2></div>
+      <p class="field-note" style="margin:0 0 1.5rem">The journal cover visitors see first. It shows once per visit and uses the Blog Title and Tagline from Site Settings.</p>
+      <div id="form-splash"></div>
+      <div class="save-bar"><button class="btn btn-dark" onclick="saveForm('splash')">Save Splash Screen</button><span class="dirty" id="dirty-splash"></span></div>
     </div>
 
     <!-- CONTRIBUTORS TAB -->
@@ -416,6 +464,10 @@
             <p>Click to upload or drag & drop<br><span style="font-size:.68rem;opacity:.6">JPG, PNG, WebP · Max 15MB</span></p>
             <img id="q-img-preview" class="img-preview-box" src="" alt="">
           </div>
+          <div class="img-actions" style="margin-top:.6rem">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="clearImg('q-img')">Remove image</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="resetQuoteImg()">Reset to default</button>
+          </div>
           <input type="file" id="q-img-file" accept="image/*" style="display:none" onchange="handleFileInput(event,'q-img')">
           <input type="hidden" id="q-img">
         </div>
@@ -460,6 +512,10 @@
         <p>Click to upload or drag & drop<br><span style="font-size:.68rem;opacity:.6">JPG, PNG, WebP · Max 15MB</span></p>
         <img id="post-img-preview" class="img-preview-box" src="" alt="">
       </div>
+      <div class="img-actions" style="margin-top:.6rem">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="clearImg('post-img')">Remove cover</button>
+      </div>
+      <p class="field-note" style="margin:.5rem 0 0">Without a cover, the post borrows one of the placeholder photos (Homepage tab).</p>
       <input type="file" id="post-img-file" accept="image/*" style="display:none" onchange="handleFileInput(event,'post-img')">
       <input type="hidden" id="post-img">
     </div>
@@ -527,6 +583,9 @@ window.addEventListener('DOMContentLoaded', () => {
 async function loadAdmin() {
   const r = await apiFetch('/api/blog');
   BLOG = await r.json();
+  try { DEFAULTS = await apiFetch('/api/admin/defaults').then(x => x.json()); } catch { DEFAULTS = {}; }
+  DRAFT = structuredClone(BLOG.site);
+  Object.keys(FORMS).forEach(renderForm);
   document.getElementById('nav-title').textContent = BLOG.site.title || "Luan's Journal";
   renderPosts();
   populateSettings();
@@ -535,7 +594,7 @@ async function loadAdmin() {
 }
 
 /* ── TABS ──────────────────────────────────── */
-const TAB_IDS = ['posts','settings','contributors','quote'];
+const TAB_IDS = ['posts','settings','home','story','splash','contributors','quote'];
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', TAB_IDS[i]===name));
   document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', TAB_IDS[i]===name));
@@ -686,13 +745,14 @@ function populateQuote() {
   document.getElementById('q-img').value  = q.image       || '';
   const prev = document.getElementById('q-img-preview');
   if (q.image) { prev.src = q.image; prev.style.display='block'; document.querySelector('#q-img-drop p').style.display='none'; }
+  else resetImgPreview('q-img');
 }
 
 async function saveQuote() {
   const quote = {
     text:        document.getElementById('q-text').value.trim(),
     attribution: document.getElementById('q-attr').value.trim(),
-    image:       document.getElementById('q-img').value || null
+    image:       document.getElementById('q-img').value
   };
   await apiFetch('/api/admin/site',{method:'PUT',body:JSON.stringify({quote})});
   BLOG.site.quote = quote;
@@ -807,6 +867,256 @@ function resetImgPreview(prefix) {
   if (prev) { prev.style.display='none'; prev.src=''; }
   const p = document.querySelector(`#${prefix}-drop p`);
   if (p) p.style.display='block';
+}
+
+/* ── EDITABLE CONTENT (Homepage / My Story / Splash) ───────────────────
+   Each tab is described by FORMS below. Fields edit DRAFT (a copy of the site
+   settings); "Save" sends that tab's top-level keys to the server.
+   Field types: text (default), textarea, url, toggle, select, image, images, list.
+   An empty image or empty photo list hides that piece on the site. */
+let DEFAULTS = {}, DRAFT = {};
+const DIRTY = {};
+const LINK_OPTS = [['#/archive', 'All posts (archive)'], ['#/story', 'My Story page'], ['#/', 'Home page']];
+
+const FORMS = {
+  home: {
+    keys: ['nav', 'heroTitle', 'heroButton', 'slides', 'slideNote', 'tiles', 'latestHeading', 'about', 'archive', 'strip', 'postPlaceholders', 'footer', 'social'],
+    fields: [
+      { h: 'Top menu' },
+      { row: [{ p: 'nav.home', l: 'Home link' }, { p: 'nav.about', l: 'About link' }] },
+      { row: [{ p: 'nav.archive', l: 'Archive link' }, { p: 'nav.categories', l: 'Categories link' }] },
+      { p: 'nav.contact', l: 'Contact link' },
+
+      { h: 'Hero', note: 'The small line under the headline is the Tagline in Site Settings.' },
+      { p: 'heroTitle', l: 'Big headline', note: 'The last word drops onto its own line.' },
+      { p: 'heroButton', l: 'Read-more button text' },
+
+      { h: 'Hero slider', note: 'Slides show your newest posts, featured posts first. A post with a cover photo uses it; otherwise the slide photo below is used. When there are fewer posts than slides, the extra slides show their own title instead. A slide with no photo is skipped, and with no slides the hero shows just the headline.' },
+      { p: 'slides', t: 'list', max: 6, add: 'Add slide', name: 'Slide', blank: { image: '', title: '' },
+        item: [{ k: 'image', t: 'image', l: 'Slide photo' }, { k: 'title', l: 'Title when there is no post for this slide' }] },
+      { p: 'slideNote', l: 'Small note on those slides' },
+
+      { h: 'Picture tiles', note: 'The picture cards under the hero. Remove a tile to hide it.' },
+      { p: 'tiles', t: 'list', max: 3, add: 'Add tile', name: 'Tile', blank: { image: '', title: '', text: '', button: 'Explore', link: '#/archive' },
+        item: [{ k: 'image', t: 'image', l: 'Photo' }, { k: 'title', l: 'Title' }, { k: 'text', t: 'textarea', l: 'Short description' },
+               { k: 'button', l: 'Button text' }, { k: 'link', t: 'select', l: 'Button goes to', opts: LINK_OPTS }] },
+      { p: 'latestHeading', l: 'Latest posts heading' },
+
+      { h: 'About section', note: 'The paragraph under the large quote is the Author Bio in Site Settings.' },
+      { p: 'about.image', t: 'image', l: 'Photo' },
+      { p: 'about.line', t: 'textarea', l: 'Large quote' },
+      { p: 'about.button', l: 'Button text' },
+
+      { h: 'Archive page' },
+      { p: 'archive.heading', l: 'Page heading' },
+
+      { h: 'Photo strip', note: 'The row of photos above the footer. Remove every photo to hide the strip.' },
+      { row: [{ p: 'strip.caption', l: 'Left caption' }, { p: 'strip.hint', l: 'Right caption' }] },
+      { p: 'strip.images', t: 'images', l: 'Photos' },
+
+      { h: 'Placeholder photos for posts', note: 'Posts without a cover image borrow one of these. Remove them all and those posts show no image.' },
+      { p: 'postPlaceholders', t: 'images', l: 'Photos' },
+
+      { h: 'Footer', note: 'Leave a social link empty to hide its icon.' },
+      { p: 'footer.line', l: 'Footer line' },
+      { row: [{ p: 'social.instagram', t: 'url', l: 'Instagram link' }, { p: 'social.pinterest', t: 'url', l: 'Pinterest link' }] },
+      { row: [{ p: 'social.youtube', t: 'url', l: 'YouTube link' }, { p: 'social.x', t: 'url', l: 'X (Twitter) link' }] }
+    ]
+  },
+  story: {
+    keys: ['story'],
+    fields: [
+      { h: 'My Story page' },
+      { p: 'story.heading', l: 'Page heading' },
+      { p: 'story.image', t: 'image', l: 'Photo' },
+      { p: 'story.lead', t: 'textarea', l: 'Intro (large text)', note: 'Leave empty to use the Author Bio from Site Settings.' },
+      { p: 'story.body', t: 'textarea', l: 'Your story', rows: 10, note: 'Leave a blank line between paragraphs.' },
+      { p: 'story.signoff', l: 'Sign-off', note: 'For example: — Luan' },
+      { p: 'story.button', l: 'Button text (goes to all posts)' }
+    ]
+  },
+  splash: {
+    keys: ['splash'],
+    fields: [
+      { h: 'Journal cover' },
+      { p: 'splash.enabled', t: 'toggle', l: 'Show the cover when someone first visits' },
+      { p: 'splash.showDate', t: 'toggle', l: 'Show today’s date on the cover' },
+      { p: 'splash.button', l: 'Button text' },
+      { p: 'splash.hint', l: 'Small hint at the bottom', note: 'Leave empty to hide it.' }
+    ]
+  }
+};
+
+/* path helpers: "slides.0.image" */
+function getP(obj, path) { return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj); }
+function setP(obj, path, val) {
+  const ks = path.split('.'); let o = obj;
+  ks.slice(0, -1).forEach((k, i) => { if (o[k] == null) o[k] = /^\d+$/.test(ks[i + 1]) ? [] : {}; o = o[k]; });
+  o[ks[ks.length - 1]] = val;
+}
+
+function fieldHTML(f, path) {
+  const p = path || f.p;
+  const v = getP(DRAFT, p);
+  const id = 'f-' + p.replace(/\./g, '-');
+  const note = f.note ? `<p class="field-note" style="margin:.4rem 0 0">${esc(f.note)}</p>` : '';
+  const t = f.t || 'text';
+  if (t === 'toggle') return `<div class="toggle-row"><span class="toggle-label">${esc(f.l)}</span>
+      <label class="toggle"><input type="checkbox" data-p="${p}" ${v !== false ? 'checked' : ''}><span class="t-slider"></span></label></div>`;
+  if (t === 'image') {
+    const def = getP(DEFAULTS, p);
+    return `<div class="form-group"><label>${esc(f.l)}</label><div class="img-field">
+      <div class="img-thumb">${v ? `<img src="${esc(v)}" alt="">` : 'No image'}</div>
+      <div class="img-actions">
+        <button type="button" class="btn btn-dark btn-sm" data-act="img-upload" data-p="${p}">${v ? 'Replace' : 'Upload'}</button>
+        ${v ? `<button type="button" class="btn btn-ghost btn-sm" data-act="img-remove" data-p="${p}">Remove</button>` : ''}
+        ${def && def !== v ? `<button type="button" class="btn btn-ghost btn-sm" data-act="img-reset" data-p="${p}">Reset to default</button>` : ''}
+      </div></div>${note}</div>`;
+  }
+  if (t === 'images') {
+    const list = Array.isArray(v) ? v : [];
+    const def = getP(DEFAULTS, p);
+    return `<div class="form-group"><label>${esc(f.l)} (${list.length})</label>
+      ${list.length ? `<div class="img-grid">${list.map((src, i) => `<div class="img-cell"><img src="${esc(src)}" alt="">
+        <div class="img-cell-ctl">
+          <button type="button" data-act="imgs-move" data-p="${p}" data-i="${i}" data-d="-1" ${i === 0 ? 'disabled' : ''} title="Move left">←</button>
+          <button type="button" class="del" data-act="imgs-del" data-p="${p}" data-i="${i}" title="Remove">✕</button>
+          <button type="button" data-act="imgs-move" data-p="${p}" data-i="${i}" data-d="1" ${i === list.length - 1 ? 'disabled' : ''} title="Move right">→</button>
+        </div></div>`).join('')}</div>` : '<p class="field-note" style="margin:0 0 .9rem">No photos. This section is hidden on the site.</p>'}
+      <div class="img-actions">
+        <button type="button" class="btn btn-dark btn-sm" data-act="imgs-add" data-p="${p}">Add photos</button>
+        ${list.length ? `<button type="button" class="btn btn-ghost btn-sm" data-act="imgs-clear" data-p="${p}">Remove all</button>` : ''}
+        ${def && JSON.stringify(def) !== JSON.stringify(list) ? `<button type="button" class="btn btn-ghost btn-sm" data-act="imgs-reset" data-p="${p}">Reset to default photos</button>` : ''}
+      </div>${note}</div>`;
+  }
+  if (t === 'list') {
+    const list = Array.isArray(v) ? v : [];
+    return `${list.map((item, i) => `<div class="list-item">
+        <div class="list-item-hd">${esc(f.name)} ${i + 1}<div>
+          <button type="button" class="btn btn-ghost btn-sm" data-act="list-move" data-p="${p}" data-i="${i}" data-d="-1" ${i === 0 ? 'disabled' : ''}>Up</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-act="list-move" data-p="${p}" data-i="${i}" data-d="1" ${i === list.length - 1 ? 'disabled' : ''}>Down</button>
+          <button type="button" class="btn btn-red btn-sm" data-act="list-del" data-p="${p}" data-i="${i}">Remove</button>
+        </div></div>
+        ${f.item.map(sub => fieldHTML(sub, `${p}.${i}.${sub.k}`)).join('')}
+      </div>`).join('') || `<p class="field-note" style="margin:0 0 1rem">Nothing here. This section is hidden on the site.</p>`}
+      <div class="img-actions" style="margin-bottom:1.4rem">
+        ${list.length < (f.max || 99) ? `<button type="button" class="btn btn-dark btn-sm" data-act="list-add" data-p="${p}">${esc(f.add)}</button>` : ''}
+        ${getP(DEFAULTS, p) && JSON.stringify(getP(DEFAULTS, p)) !== JSON.stringify(list) ? `<button type="button" class="btn btn-ghost btn-sm" data-act="list-reset" data-p="${p}">Reset to default</button>` : ''}
+      </div>`;
+  }
+  if (t === 'select') return `<div class="form-group"><label for="${id}">${esc(f.l)}</label>
+      <select id="${id}" data-p="${p}">${f.opts.map(([val, lab]) => `<option value="${esc(val)}" ${val === v ? 'selected' : ''}>${esc(lab)}</option>`).join('')}</select>${note}</div>`;
+  if (t === 'textarea') return `<div class="form-group"><label for="${id}">${esc(f.l)}</label>
+      <textarea id="${id}" data-p="${p}" rows="${f.rows || 3}">${esc(v || '')}</textarea>${note}</div>`;
+  return `<div class="form-group"><label for="${id}">${esc(f.l)}</label>
+      <input type="${t === 'url' ? 'url' : 'text'}" id="${id}" data-p="${p}" value="${esc(v || '')}" ${t === 'url' ? 'placeholder="https://…"' : ''}>${note}</div>`;
+}
+
+function renderForm(name) {
+  const el = document.getElementById('form-' + name);
+  const scrollY = window.scrollY;
+  let html = '', open = false;
+  FORMS[name].fields.forEach(f => {
+    if (f.h) {
+      if (open) html += '</div>';
+      html += `<div class="s-card"><h3>${esc(f.h)}</h3>${f.note ? `<p class="field-note">${esc(f.note)}</p>` : ''}`;
+      open = true;
+    } else if (f.row) html += `<div class="form-row">${f.row.map(x => fieldHTML(x)).join('')}</div>`;
+    else html += fieldHTML(f);
+  });
+  if (open) html += '</div>';
+  el.innerHTML = html;
+  window.scrollTo(0, scrollY);
+  if (!el.dataset.wired) wireForm(name, el);
+}
+
+function markDirty(name) {
+  DIRTY[name] = true;
+  document.getElementById('dirty-' + name).textContent = 'Unsaved changes';
+}
+function formOf(path) { return Object.keys(FORMS).find(n => FORMS[n].keys.includes(path.split('.')[0])); }
+
+function wireForm(name, el) {
+  el.dataset.wired = '1';
+  el.addEventListener('input', e => {
+    const p = e.target.dataset.p; if (!p) return;
+    setP(DRAFT, p, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+    markDirty(name);
+  });
+  el.addEventListener('change', e => {
+    const p = e.target.dataset.p; if (!p || (e.target.type !== 'checkbox' && e.target.tagName !== 'SELECT')) return;
+    setP(DRAFT, p, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+    markDirty(name);
+  });
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const { act, p } = b.dataset; const i = +b.dataset.i; const d = +b.dataset.d;
+    const list = () => { const v = getP(DRAFT, p); return Array.isArray(v) ? v : []; };
+    try {
+      if (act === 'img-upload') { const [url] = await pickAndUpload(false); if (!url) return; setP(DRAFT, p, url); }
+      else if (act === 'img-remove') setP(DRAFT, p, '');
+      else if (act === 'img-reset') setP(DRAFT, p, getP(DEFAULTS, p));
+      else if (act === 'imgs-add') { const urls = await pickAndUpload(true); if (!urls.length) return; setP(DRAFT, p, [...list(), ...urls]); }
+      else if (act === 'imgs-del' || act === 'list-del') { const l = [...list()]; l.splice(i, 1); setP(DRAFT, p, l); }
+      else if (act === 'imgs-move' || act === 'list-move') { const l = [...list()]; const j = i + d; if (j < 0 || j >= l.length) return; [l[i], l[j]] = [l[j], l[i]]; setP(DRAFT, p, l); }
+      else if (act === 'imgs-clear') setP(DRAFT, p, []);
+      else if (act === 'imgs-reset' || act === 'list-reset') setP(DRAFT, p, structuredClone(getP(DEFAULTS, p)));
+      else if (act === 'list-add') { const f = FORMS[name].fields.find(x => x.p === p); setP(DRAFT, p, [...list(), structuredClone(f.blank)]); }
+      else return;
+    } catch (err) { toast(err.message || 'Upload failed', 'error'); return; }
+    markDirty(name);
+    renderForm(name);
+  });
+}
+
+function pickAndUpload(multiple) {
+  return new Promise(resolve => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*'; input.multiple = multiple;
+    input.onchange = async () => {
+      const urls = [];
+      try {
+        for (const file of input.files) {
+          toast(`Uploading ${file.name}…`);
+          const fd = new FormData(); fd.append('image', file);
+          const r = await fetch('/api/admin/upload', { method: 'POST', headers: { 'x-admin-token': TOKEN }, body: fd });
+          if (!r.ok) throw new Error(`Couldn't upload ${file.name}. Use a JPG, PNG, GIF or WebP under 15 MB.`);
+          urls.push((await r.json()).url);
+        }
+        if (urls.length) toast(urls.length > 1 ? `${urls.length} photos uploaded. Save to publish them.` : 'Photo uploaded. Save to publish it.', 'success');
+      } catch (err) { toast(err.message, 'error'); }
+      resolve(urls);
+    };
+    input.click();
+  });
+}
+
+async function saveForm(name) {
+  const body = {};
+  FORMS[name].keys.forEach(k => { body[k] = DRAFT[k]; });
+  const r = await apiFetch('/api/admin/site', { method: 'PUT', body: JSON.stringify(body) });
+  if (!r.ok) { toast('Couldn’t save. Check your connection and sign in again if needed.', 'error'); return; }
+  Object.assign(BLOG.site, structuredClone(body));
+  DIRTY[name] = false;
+  document.getElementById('dirty-' + name).textContent = '';
+  toast('Saved. Refresh the site to see it.', 'success');
+}
+
+window.addEventListener('beforeunload', e => {
+  if (Object.values(DIRTY).some(Boolean)) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* remove / reset for the single image pickers (post cover, quote image) */
+function clearImg(prefix) {
+  document.getElementById(prefix).value = '';
+  resetImgPreview(prefix);
+}
+function resetQuoteImg() {
+  const def = (DEFAULTS.quote || {}).image || '';
+  document.getElementById('q-img').value = def;
+  const prev = document.getElementById('q-img-preview');
+  if (def) { prev.src = def; prev.style.display = 'block'; document.querySelector('#q-img-drop p').style.display = 'none'; }
+  else resetImgPreview('q-img');
 }
 
 /* ── UTILS ─────────────────────────────────── */
