@@ -1,37 +1,36 @@
-# Daily Dose — Blog
+# Luan's Journal — Blog
 
-> A warm, editorial blog with admin panel. Built with Node.js + Express.
+> A personal, editorial blog with admin panel. Built with Node.js + Express.
 > Data and uploads persist via a Railway Volume across all redeploys.
 
 ---
 
 ## Overview
 
-**Daily Dose** is a lightweight, full-stack blog platform with:
+**Luan's Journal** is a lightweight, full-stack personal blog with:
 
-- A beautiful splash screen with an interactive puzzle icon
-- Editorial-style article layout (Sunset Terra color palette)
-- Quote block section below every article
-- Contributors section with avatar support
+- A burgundy-on-paper editorial design (see `luan1.jpg` reference) mixed with a photo-led layout
+- Photos printed as a wine "risograph" duotone that blooms into full colour on hover
+- Hero photo slider showing the three latest (featured first) posts
+- Journal-cover splash screen, blog / my story entry tiles, latest posts list, photo strip
+- Archive with search and tag filters, and a "my story" page
 - Admin panel for managing all content — no database required
 - Image uploads stored on a persistent volume
-- Password-protected admin with session storage
 
 ---
 
 ## Project Structure
 
 ```
-daily-dose-blog/
+luans-journal/
 ├── server.js              # Express server + REST API
-├── package.json           # Dependencies
-├── .gitignore
-├── README.md
+├── package.json
 ├── public/
-│   ├── index.html         # Blog frontend (splash, articles, quote, contributors)
-│   └── admin.html         # Admin panel (posts, settings, contributors, quote)
-└── data/                  # Created automatically at runtime (do not commit)
-    └── blog.json          # All blog content stored here
+│   ├── index.html         # Blog frontend (home, archive, story, post)
+│   ├── admin.html         # Admin panel
+│   └── img/               # Placeholder photography (AI-generated via Pollinations)
+└── data/                  # Created at runtime (do not commit)
+    └── blog.json          # All blog content
 ```
 
 > **Uploads** are saved to an `uploads/` folder (also created at runtime). Both `data/` and `uploads/` are excluded from Git and should be pointed to your Railway Volume via environment variables.
@@ -40,43 +39,36 @@ daily-dose-blog/
 
 ## Design
 
-### Color Palette — Sunset Terra
+### Colour palette
 
-| Variable       | Hex       | Use                          |
-|----------------|-----------|------------------------------|
-| `--cream`      | `#F9EEE2` | Main background              |
-| `--cream-2`    | `#FBE0D2` | Cards, secondary backgrounds |
-| `--blush`      | `#FFCBBC` | Highlight, pull quote border |
-| `--terra`      | `#DDB398` | Primary accent, links, tags  |
-| `--peach`      | `#F8C5AD` | Warm accent, meta dots       |
-| `--brown`      | `#3D2317` | Primary text, nav, footer    |
-| `--brown-mid`  | `#6B4030` | Medium text                  |
-| `--brown-soft` | `#A07868` | Muted/placeholder text       |
+| Variable      | Hex       | Use                              |
+|---------------|-----------|----------------------------------|
+| `--paper`     | `#F3EEEA` | Page background                  |
+| `--paper-2`   | `#EBE3DE` | Image wells, hover fills         |
+| `--wine`      | `#7A1838` | Text, rules, buttons, photo ink  |
+| `--wine-deep` | `#5A0F28` | Article body text, button hover  |
+| `--rose`      | `#D9BCC4` | Soft accents                     |
 
 ### Typography
 
-| Role     | Font                  |
-|----------|-----------------------|
-| Display  | Cormorant Garamond    |
-| Body     | Lora                  |
-| UI / Nav | Jost                  |
+| Role               | Font        |
+|--------------------|-------------|
+| Display & reading  | Albert Sans |
+| Labels, meta, nav  | DM Mono     |
+
+### Placeholder photos
+
+Any post without a cover image gets a photo from `public/img/strip-*.jpg`. Upload a cover in the admin panel and it replaces the placeholder (shown in full colour on the post page).
 
 ---
 
 ## Features
 
 ### Blog Frontend (`public/index.html`)
-- **Splash screen** — two dark panels slide in from top/bottom; animated puzzle icon (4 interlocking pieces per Sunset Terra palette); click puzzle to scatter/reassemble pieces; auto-populated from API
-- **Reading progress bar** — thin amber gradient line at top of viewport
-- **Home/list view** — shows all published posts with date, title, subtitle, and thumbnail
-- **Single post view** — hero with large editorial title, reading time, drop cap on first letter, pull quote on penultimate paragraph, puzzle icon divider mid-article
-- **Quote block** — two-column card (quote text + attribution on left, image on right); fully editable from admin
-- **Contributors section** — avatar circles in Sunset Terra colors, name + role; hidden if empty
-- **Author card** — pulls from site settings
-- **More posts grid** — shown on dark background when other published posts exist
-- **Footer** — `Daily Dose © All Rights Reserved 2026`
-- **Scroll reveal animations** — staggered fade-up on all sections
-- **Responsive** — mobile-friendly layout
+- **Routes** — `#/` home, `#/archive`, `#/story`, `#/post/<id>` (shareable links)
+- **Home** — hero headline (`site.heroTitle`), photo slider, two entry tiles, latest posts, about band, photo strip
+- **Single post** — date column, large title, cover photo, lede paragraph, `> ` lines become pull quotes, tags, quote band, contributors, author, keep reading
+- **Reading progress bar**, reduced-motion support, responsive down to phone width
 
 ### Admin Panel (`public/admin.html`)
 Protected by password (default: `admin123`). Session persists via `sessionStorage`.
@@ -111,7 +103,7 @@ Protected by password (default: `admin123`). Session persists via `sessionStorag
 
 ```bash
 # Clone or unzip the project
-cd daily-dose-blog
+cd luans-journal
 
 # Install dependencies
 npm install
@@ -135,7 +127,7 @@ Default admin password: **`admin123`**
 # Inside your project folder:
 git init
 git add .
-git commit -m "Initial commit — Daily Dose blog"
+git commit -m "Initial commit — Luan's Journal blog"
 
 # Create a new repo at github.com, then:
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
@@ -216,14 +208,14 @@ All admin routes require the header: `x-admin-token: YOUR_PASSWORD`
 
 ```json
 {
-  "title":         "Daily Dose",
-  "tagline":       "A daily dose of thoughts that matter",
+  "title":         "Luan's Journal",
+  "tagline":       "thoughts, dreams, and everything in between.",
   "author":        "The Editor",
   "bio":           "Writing about life and the art of simply being.",
   "adminPassword": "newpassword123",
   "quote": {
     "text":        "Not everything needs to be optimized.",
-    "attribution": "— Daily Dose",
+    "attribution": "— Luan's Journal",
     "image":       "/uploads/quote-image.jpg"
   },
   "contributors": [

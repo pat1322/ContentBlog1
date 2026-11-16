@@ -16,29 +16,52 @@ const BLOG_FILE   = path.join(DATA_DIR, 'blog.json');
 
 const DEFAULT_BLOG = {
   site: {
-    title:         "Daily Dose",
-    tagline:       "A daily dose of thoughts that matter",
-    author:        "The Editor",
-    bio:           "Writing about life, hobbies, and the art of simply being.",
+    title:         "Luan's Journal",
+    tagline:       "thoughts, dreams, and everything in between.",
+    heroTitle:     "just another chapter.",
+    author:        "Luan",
+    bio:           "Writing about growth, slow days, good food, and the little joys in between.",
     adminPassword: "admin123",
     quote: {
       text:        "Not everything needs to be optimized. Not every moment has to lead somewhere. Sometimes the most radical act is to simply pause.",
-      attribution: "— Daily Dose",
+      attribution: "— luan's journal",
       image:       null
     },
     contributors:  []
   },
   posts: [
     {
+      id:        "3",
+      title:     "A little reflection",
+      subtitle:  "On growth, overthinking, and finding peace in the chaos.",
+      content:   "Some weeks feel like a whole chapter. This was one of them.\n\nI have been learning that growth is rarely loud. It looks like going to bed a little earlier, saying no without a long explanation, and letting a messy day just be a messy day.\n\n> Peace is not the absence of chaos. It is how gently you hold yourself inside it.\n\nSo this is me, writing it down, so I remember.",
+      image:     null,
+      date:      "2025-11-01",
+      tags:      ["reflection", "growth"],
+      published: true,
+      featured:  true
+    },
+    {
+      id:        "2",
+      title:     "Days in my life",
+      subtitle:  "Coffee-less days, good food, and busy schedules ♡",
+      content:   "A small diary of an ordinary week: early alarms, a new café around the corner, and the dinner I keep thinking about.\n\nNothing extraordinary happened, and that is exactly why I wanted to keep it.",
+      image:     null,
+      date:      "2025-10-28",
+      tags:      ["life", "diary"],
+      published: true,
+      featured:  false
+    },
+    {
       id:        "1",
       title:     "The Most Underrated Hobby That Everyone Should Try",
       subtitle:  "If hobbies are supposed to make me feel better, why do I feel like I'm wasting time the moment I enjoy them without purpose?",
       content:   "I notice it even in small things. When I draw without trying to be good at it. When I walk without tracking steps. When I listen to music without multitasking. There's always this quiet pressure in my head asking, \"Is this even worth it?\"\n\nWhile physical sports offer a sense of satisfaction and movement, placing the last piece of a puzzle on the other hand may not offer the thrill of trying to catch a ball nor paddling, but it brings its own blend of joy, satisfaction, and frustration all at once. I think one of the most underrated hobbies that one should actually go back to is doing things with no goal attached.\n\nIn a world that constantly pushes productivity, we forget that not everything needs to be optimized. Not every moment has to lead somewhere. Sometimes, the value of a hobby isn't in improvement, recognition, or output—but in how it lets you pause and simply exist.\n\nThere is something quietly powerful about doing things just because you want to. No pressure. No expectations. Just presence.\n\nSo, here's the real puzzle for me: maybe the most underrated hobby isn't something new at all—It's the one you truly love, the one that comforts you and brings out a version of yourself you never knew existed.\n\nAnd maybe, just maybe, that's already enough.",
       image:     null,
-      date:      "2025-01-15",
+      date:      "2025-10-24",
       tags:      ["lifestyle", "mindfulness", "hobbies"],
       published: true,
-      featured:  true
+      featured:  false
     }
   ]
 };
@@ -46,6 +69,18 @@ const DEFAULT_BLOG = {
 if (!fs.existsSync(BLOG_FILE)) {
   fs.writeFileSync(BLOG_FILE, JSON.stringify(DEFAULT_BLOG, null, 2));
 }
+
+// One-time rename: existing installs still carry the old "Daily Dose" branding in blog.json.
+(function migrateBranding() {
+  try {
+    const blog = JSON.parse(fs.readFileSync(BLOG_FILE, 'utf8'));
+    let changed = false;
+    if (blog.site.title === 'Daily Dose') { blog.site.title = DEFAULT_BLOG.site.title; changed = true; }
+    if (blog.site.tagline === 'A daily dose of thoughts that matter') { blog.site.tagline = DEFAULT_BLOG.site.tagline; changed = true; }
+    if (blog.site.quote && blog.site.quote.attribution === '— Daily Dose') { blog.site.quote.attribution = DEFAULT_BLOG.site.quote.attribution; changed = true; }
+    if (changed) fs.writeFileSync(BLOG_FILE, JSON.stringify(blog, null, 2));
+  } catch (e) { console.error('Branding migration skipped:', e.message); }
+})();
 
 function readBlog() {
   try { return JSON.parse(fs.readFileSync(BLOG_FILE, 'utf8')); }
@@ -127,4 +162,4 @@ app.post('/api/admin/upload', requireAuth, upload.single('image'), (req, res) =>
   res.json({ url: `/uploads/${req.file.filename}` });
 });
 
-app.listen(PORT, () => console.log(`✦ Daily Dose → http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`✦ Luan's Journal → http://localhost:${PORT}`));
